@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middlewares/errors.js";
 
+
 //Gestionez exceptiile necapturate
 process.on("uncaughtException", (err) => {
   console.log(`ERROR: ${err}`);
@@ -17,7 +18,7 @@ dotenv.config({ path: "backend/config/config.env" });
 //Ne conectam la baza de date
 connectDatabase();
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
 //Importam toate rutele
 import productRoutes from "./routes/products.js";
@@ -43,3 +44,4 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
+

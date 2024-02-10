@@ -1,6 +1,8 @@
 import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import User from "../modals/user.js";
+import {getResetPasswordTemplate} from "../utils/emailTemplates.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import sendEmail from "../utils/sendEmail.js";
 import sendToken from "../utils/sendToken.js";
 
 //Inregistrarea utilizatorului => /api/v1/register
@@ -50,5 +52,43 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     message: "Logged Out",
-  })
+  });
+});
+
+// Ai uitat parola => /api/v1/password/forgot
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  //Cauta userul in baza de date
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found with this email", 404));
+  }
+
+  //Obitinem resetarea tokenului pentru resetarea parolei
+  const resetToken = await user.getResetPasswordToken()
+  await user.save();
+
+  //Creem url-ul pentru resetarea parolei
+  const resetUrl = `${process.env.FRONTEND_URL}/api/v1/password/reset/${resetToken}`;
+
+  const message = getResetPasswordTemplate(user?.name, resetUrl);
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Quantum Password Recovery",
+      message,
+    })
+
+    res.status(200).json({
+      message: `Email sent to: ${user.email}`,
+    });
+  } catch (error) {
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+
+    await user.save()
+    return next(new ErrorHandler(error?.message, 500))
+  }
+  sendToken(user, 200, res);
 });
