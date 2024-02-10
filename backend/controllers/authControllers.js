@@ -1,6 +1,7 @@
 import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import User from "../modals/user.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import sendToken from "../utils/sendToken.js";
 
 //Inregistrarea utilizatorului => /api/v1/register
 export const registerUser = catchAsyncErrors(async (req, res, next) => {
@@ -14,11 +15,8 @@ export const registerUser = catchAsyncErrors(async (req, res, next) => {
 
   const token = user.getJwtToken();
 
-  res.status(201).json({
-    token,
-  });
+  sendToken(user, 201, res);
 });
-
 //Logarea utilizatorului => /api/v1/register
 export const loginUser = catchAsyncErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -28,21 +26,29 @@ export const loginUser = catchAsyncErrors(async (req, res, next) => {
   }
 
   //Cauta userul in baza de date
-  const user = await User.findOne({email}).select("+password");
+  const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new ErrorHandler("Inavalid email or password", 401));
   }
 
   //Verificam daca parola introdusa este corecta
-  const isPasswordMatched = await user.comparePassword(password)
+  const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Inavalid email or password", 401));
   }
 
-  const token = user.getJwtToken();
+  sendToken(user, 200, res);
+});
+
+//Delogarea utilizatourului => /api/v1/logout
+export const logout = catchAsyncErrors(async (req, res, next) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
 
   res.status(200).json({
-    token,
-  });
+    message: "Logged Out",
+  })
 });
