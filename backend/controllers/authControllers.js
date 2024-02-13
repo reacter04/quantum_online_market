@@ -126,3 +126,104 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
   sendToken(user, 200, res);
 });
+
+// Obtine profilul actual al userului => /api/v1/me
+export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req?.user?._id);
+  res.status(200).json({
+    user,
+  });
+});
+
+// Schibam parola  => /api/v1/password/update
+export const updatePassword = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req?.user?._id).select("+password");
+
+  //Verific daca parola anterioara daca este acceasi cu cea introdusa
+  const isPasswordMatced = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatced) {
+    return next(new ErrorHandler("Old Password is incorrect", 400));
+  }
+  user.password = req.body.password;
+  user.save();
+
+  res.status(200).json({
+    succes: true,
+  });
+});
+
+// Schibam userul (numele si emailul)  => /api/v1/me/update
+export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  const user = await User.findByIdAndUpdate(req.user._id, newUserData, {
+    new: true,
+  });
+
+  res.status(200).json({
+    user,
+  });
+});
+
+// Obtinem lista cu toti userii - ADMIN  => /api/v1/admin/users
+export const allUsers = catchAsyncErrors(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    users,
+  });
+});
+
+// Obtinem detaliile userului - ADMIN  => /api/v1/admin/users/:id
+export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`Not found user with id: ${req.params._id}`, 404)
+    );
+  }
+
+  res.status(200).json({
+    user,
+  });
+});
+
+// Schibam detaliile userulului (ADMIN)  => /api/v1/admin/users/:id
+export const updateUser = catchAsyncErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+  });
+
+  res.status(200).json({
+    user,
+  });
+});
+
+// Stergem userul - ADMIN  => /api/v1/admin/users/:id
+export const deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`Not found user with id: ${req.params.id}`, 404)
+    );
+  }
+
+  //DE STERS POZA DE PE AVATAR DE PE CLOUDINARY (mai tarziu revin)
+  await user.deleteOne();
+
+  res.status(200).json({
+    succes: true,
+  });
+});

@@ -73,14 +73,14 @@ const productSchema = new mongoose.Schema(
         },
         comment: {
           type: String,
-          required: true,
+          required: false,
         },
       },
     ],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
   },
   { timestamps: true }

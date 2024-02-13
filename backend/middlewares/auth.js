@@ -19,12 +19,17 @@ export const isAuthentificatedUser = catchAsyncErrors(
   }
 );
 
-//Administrarea rolurilor utilizatorilor (creeaza produs doar adminul)
+//Administrarea rolurilor utilizatorilor (creeaza produs sau obtine lista tuturor userilor doar adminul)
 export const authoriseRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(new ErrorHandler(`Role ${req.user.role} is not allowed to acces this resource`, 403));
+      return next(
+        new ErrorHandler(
+          `Role (${req.user.role}) is not allowed to acces this resource`,
+          403
+        )
+      );
     }
-    next()
+    next();
   };
 };
