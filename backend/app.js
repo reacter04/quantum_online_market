@@ -23,9 +23,12 @@ app.use(cookieParser());
 //Importam toate rutele
 import productRoutes from "./routes/products.js";
 import authRoutes from "./routes/auth.js";
+import orderRoutes from "./routes/order.js";
 
 app.use("/api/v1", productRoutes);
 app.use("/api/v1", authRoutes);
+app.use("/api/v1", orderRoutes);
+
 
 //Folosim middlewareul de gestionare a erorilor
 app.use(errorMiddleware);
