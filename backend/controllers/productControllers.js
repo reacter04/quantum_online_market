@@ -87,7 +87,7 @@ export const createProductReview = catchAsyncErrors(async (req, res, next) => {
     });
   } else {
     product.reviews.push(review);
-    product.numberOfReviews = product.reviews.length;
+    product.numOfReviews = product.reviews.length;
   }
 
   product.ratings =
@@ -121,16 +121,16 @@ export const deleteReview = catchAsyncErrors(async (req, res, next) => {
     (review) => review._id.toString() !== req?.query?.id.toString()
   );
 
-  const numberOfReviews = reviews.length;
+  const numOfReviews = reviews.length;
 
-  const ratings = !numberOfReviews
+  const ratings = !numOfReviews
     ? 0
     : product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-      numberOfReviews;
+      numOfReviews;
 
   product = await Product.findByIdAndUpdate(
     req.query.productId,
-    { reviews, numberOfReviews, ratings },
+    { reviews, numOfReviews, ratings },
     { new: true }
   );
   res.status(200).json({

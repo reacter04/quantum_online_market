@@ -56,7 +56,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Write how many products are in stock"],
     },
-    numberOfReviews: {
+    numOfReviews: {
       type: Number,
       default: 0,
     },
