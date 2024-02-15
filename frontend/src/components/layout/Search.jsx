@@ -19,7 +19,7 @@ function Search() {
      if(searchParams.has("keyword")){
       setKeyword(searchParams.get("keyword"))
      }
-  }, [keyword, searchParams])
+  }, [searchParams])
 
   return (
     <form

@@ -21,10 +21,11 @@ function Home() {
 
   min !== null && (params.min = min);
   max !== null && (params.max = max);
-  category !== null && (params.category = category);
-  rating!== null && (params.rating = rating);
-  const { data, isLoading, error, isError } = useGetProductsQuery(params);
 
+  category !== null && (params.category = category);
+  rating !== null && (params.rating = rating);
+
+  const { data, isLoading, error, isError } = useGetProductsQuery(params);
   useEffect(() => {
     if (isError) {
       toast.error(error?.data?.message);
